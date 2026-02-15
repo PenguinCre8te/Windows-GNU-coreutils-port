@@ -3,7 +3,7 @@ name: Windows CI/CD
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
+    tags: [ 'v*' ]   # e.g. v1.0.0
   pull_request:
     branches: [ main ]
 
@@ -15,11 +15,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup LLVM
-        uses: egor-tensin/setup-clang@v1
-        with:
-          version: latest
-          platform: x64   # host compiler
+      - name: Install llvm-mingw toolchain
+        run: |
+          curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240910/llvm-mingw-20240910-msvcrt-x86_64.zip -o llvm-mingw.zip
+          tar -xf llvm-mingw.zip
+          echo "${{ github.workspace }}/llvm-mingw/bin" >> $GITHUB_PATH
 
       # Build x64
       - name: Build ls.exe (x64)
