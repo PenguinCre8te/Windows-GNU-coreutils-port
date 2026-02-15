@@ -9,7 +9,7 @@ ARCH    ?= x86_64-w64-mingw32
 OUTPUT  ?= ls.exe
 
 # Sysroot: if LLVM_MINGW is set, use it; otherwise rely on system defaults
-SYSROOT ?= $(LLVM_MINGW)/$(ARCH)
+SYSROOT ?= $(LLVM_MINGW)\$(ARCH)
 
 all: $(OUTPUT)
 
