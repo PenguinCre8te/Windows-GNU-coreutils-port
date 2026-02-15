@@ -19,6 +19,7 @@ jobs:
         run: |
           curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20251216/llvm-mingw-20251216-ucrt-x86_64.zip -o llvm-mingw.zip
           tar -xf llvm-mingw.zip
+          echo "LLVM_MINGW=${{ github.workspace }}/llvm-mingw-20251216-ucrt-x86_64" >> $GITHUB_ENV
           echo "${{ github.workspace }}/llvm-mingw-20251216-ucrt-x86_64/bin" >> $GITHUB_PATH
 
       # Build x64
