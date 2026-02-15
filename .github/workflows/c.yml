@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]   # Build for both x86_64 and aarch64
 
     steps:
       - name: Checkout repository
@@ -19,20 +22,20 @@ jobs:
         uses: egor-tensin/setup-clang@v1
         with:
           version: latest
-          platform: x64
+          platform: ${{ matrix.arch }}
 
       - name: Build ls.exe
         working-directory: ./ls
-        run: clang main.c -o ls.exe
+        run: make build ARCH=${{ matrix.arch }}
 
       - name: Build rm.exe
         working-directory: ./rm
-        run: clang main.c -o rm.exe
+        run: make build ARCH=${{ matrix.arch }}
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: windows-binaries
+          name: windows-binaries-${{ matrix.arch }}
           path: |
             ls/ls.exe
             rm/rm.exe
@@ -46,15 +49,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
+      - name: Download x64 artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-binaries
-          path: ./dist
+          name: windows-binaries-x64
+          path: ./dist/x64
+
+      - name: Download arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-binaries-arm64
+          path: ./dist/arm64
+
+      - name: Verify binaries
+        run: |
+          dir dist\x64
+          dir dist\arm64
+          if not exist dist\x64\ls.exe exit 1
+          if not exist dist\x64\rm.exe exit 1
+          if not exist dist\arm64\ls.exe exit 1
+          if not exist dist\arm64\rm.exe exit 1
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/ls.exe
-            dist/rm.exe
+            dist/x64/ls.exe
+            dist/x64/rm.exe
+            dist/arm64/ls.exe
+            dist/arm64/rm.exe
+          generate_release_notes: true
