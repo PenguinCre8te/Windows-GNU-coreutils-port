@@ -10,35 +10,42 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        arch: [x64, arm64]   # Build for both x86_64 and aarch64
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup LLVM
+      - name: Setup LLVM (host x64)
         uses: egor-tensin/setup-clang@v1
         with:
           version: latest
-          platform: ${{ matrix.arch }}
+          platform: x64
 
-      - name: Build ls.exe
+      - name: Build ls.exe (x64)
         working-directory: ./ls
-        run: make build ARCH=${{ matrix.arch }}
+        run: make build ARCH=x64 OUTPUT=ls_x64.exe
 
-      - name: Build rm.exe
+      - name: Build rm.exe (x64)
         working-directory: ./rm
-        run: make build ARCH=${{ matrix.arch }}
+        run: make build ARCH=x64 OUTPUT=rm_x64.exe
+
+      - name: Build ls.exe (arm64 cross)
+        working-directory: ./ls
+        run: make build ARCH=arm64 OUTPUT=ls_arm64.exe
+
+      - name: Build rm.exe (arm64 cross)
+        working-directory: ./rm
+        run: make build ARCH=arm64 OUTPUT=rm_arm64.exe
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: windows-binaries-${{ matrix.arch }}
+          name: windows-binaries
           path: |
-            ls/ls.exe
-            rm/rm.exe
+            ls/ls_x64.exe
+            rm/rm_x64.exe
+            ls/ls_arm64.exe
+            rm/rm_arm64.exe
 
   release:
     needs: build
@@ -49,33 +56,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download x64 artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-binaries-x64
-          path: ./dist/x64
-
-      - name: Download arm64 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-binaries-arm64
-          path: ./dist/arm64
+          name: windows-binaries
+          path: ./dist
 
       - name: Verify binaries
         run: |
-          dir dist\x64
-          dir dist\arm64
-          if not exist dist\x64\ls.exe exit 1
-          if not exist dist\x64\rm.exe exit 1
-          if not exist dist\arm64\ls.exe exit 1
-          if not exist dist\arm64\rm.exe exit 1
+          dir dist
+          if not exist dist\ls_x64.exe exit 1
+          if not exist dist\rm_x64.exe exit 1
+          if not exist dist\ls_arm64.exe exit 1
+          if not exist dist\rm_arm64.exe exit 1
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/x64/ls.exe
-            dist/x64/rm.exe
-            dist/arm64/ls.exe
-            dist/arm64/rm.exe
+            dist/ls_x64.exe
+            dist/rm_x64.exe
+            dist/ls_arm64.exe
+            dist/rm_arm64.exe
           generate_release_notes: true
