@@ -1,18 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Install LLVM/Clang if not already available (Windows runners need Chocolatey or winget)
-install_clang() {
-  if [[ "$RUNNER_OS" == "Windows" ]]; then
-    echo "Installing LLVM/Clang on Windows..."
-    choco install llvm -y || winget install LLVM.LLVM
-  else
-    echo "Installing LLVM/Clang on Linux..."
-    sudo apt-get update
-    sudo apt-get install -y llvm clang make
-  fi
-}
-
 # Build all subdirectories with Makefiles
 build_subdirs() {
   for dir in */ ; do
@@ -39,7 +27,6 @@ package_artifacts() {
 }
 
 main() {
-  install_clang
   build_subdirs
   package_artifacts
 }
