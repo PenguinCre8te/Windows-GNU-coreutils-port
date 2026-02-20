@@ -1,11 +1,11 @@
 # Compiler and flags
 CC      := clang
-CFLAGS  := -O3 -municode
+CFLAGS  := -O3
 RM      := del
 RM_LIBS := -lshell32 -ladvapi32 -lshlwapi
 
 # Default architecture and output
-OUTPUT  ?= rm.exe
+OUTPUT  ?= timep.exe
 
 all: $(OUTPUT)
 
