@@ -18,7 +18,7 @@ build_subdirs() {
   for dir in */ ; do
     if [[ -f "$dir/Makefile" ]]; then
       echo "Building in $dir"
-      (cd "$dir" && make CC=clang CXX=clang++ build)
+      (cd "$dir" && make CC=clang CXX=clang++)
     fi
   done
 }
